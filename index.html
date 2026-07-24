@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="タイ移住">
+<meta name="theme-color" content="#134e4a">
+<link rel="manifest" href='data:application/manifest+json,{"name":"タイ移住 やることリスト","short_name":"タイ移住","display":"standalone","background_color":"%23134e4a","theme_color":"%23134e4a","start_url":"."}'>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23134e4a'/%3E%3Ctext x='90' y='118' font-size='96' text-anchor='middle' fill='%23fbbf24'%3E%E2%9C%93%3C/text%3E%3C/svg%3E">
+<title>タイ移住 やることリスト</title>
+<style>
+  :root{
+    --stone100:#f5f5f4; --stone50:#fafaf9; --stone200:#e7e5e4; --stone300:#d6d3d1;
+    --teal900:#134e4a; --teal800:#115e59; --teal700:#0f766e; --teal300:#5eead4; --teal100:#ccfbf1; --teal50:#f0fdfa;
+    --amber400:#fbbf24; --amber300:#fcd34d; --amber100:#fef3c7; --amber50:#fffbeb; --amber900:#78350f;
+    --rose600:#e11d48; --rose700:#be123c; --rose500:#f43f5e; --rose200:#fecdd3; --rose50:#fff1f2; --rose700t:#be123c;
+    --slate800:#1e293b; --slate700:#334155; --slate600:#475569; --slate500:#64748b; --slate400:#94a3b8; --slate300:#cbd5e1; --slate200:#e2e8f0;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--stone100);color:var(--slate800);
+    font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    -webkit-text-size-adjust:100%;}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 48px;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  input,select,textarea{font-family:inherit;}
+  input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--teal700);outline-offset:1px;}
+
+  /* header */
+  .pass{display:flex;overflow:hidden;border-radius:12px;background:var(--teal900);color:var(--stone50);box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:28px;}
+  .pass-main{flex:1;padding:22px;}
+  .pass-kicker{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--teal300);}
+  .pass h1{margin:8px 0 0;font-size:26px;}
+  .pass-bar{display:flex;align-items:center;gap:12px;margin-top:16px;}
+  .track{flex:1;height:6px;border-radius:999px;background:var(--teal800);overflow:hidden;}
+  .fill{height:100%;border-radius:999px;background:var(--amber400);transition:width .4s;}
+  .pass-stub{width:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px;border-left:2px dashed var(--teal700);}
+  .stub-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal300);}
+  .stub-num{font-size:40px;font-weight:700;line-height:1;color:var(--amber400);}
+  .stub-unit{font-size:10px;letter-spacing:.1em;color:var(--teal300);}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:22px;}
+  .pill{border-radius:999px;border:1px solid var(--slate300);background:#fff;padding:7px 16px;font-size:12px;color:var(--slate600);}
+  .pill:hover{border-color:var(--teal700);color:var(--teal800);}
+  .pill.danger:hover{border-color:var(--rose500);background:var(--rose50);color:var(--rose600);}
+  .pill.solid{background:var(--teal800);border-color:var(--teal700);color:#fff;}
+  .pill.solid:hover{background:var(--teal900);color:#fff;}
+
+  .confirm{display:flex;align-items:center;gap:8px;border-radius:999px;border:1px solid var(--rose200);background:var(--rose50);padding:4px 4px 4px 12px;font-size:12px;color:var(--rose700);}
+  .confirm .go{border-radius:999px;background:var(--rose600);color:#fff;padding:4px 12px;}
+  .confirm .go:hover{background:var(--rose700);}
+  .confirm .no{padding:4px 8px;color:var(--rose500);}
+
+  .export{border:1px solid var(--teal100);background:#fff;border-radius:12px;padding:16px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .export .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px;}
+  .export textarea{width:100%;border:1px solid var(--slate300);background:var(--stone50);border-radius:8px;padding:12px;font-family:ui-monospace,monospace;font-size:12px;line-height:1.7;color:var(--slate700);}
+  .copybtn{border-radius:999px;background:var(--amber400);color:var(--teal900);font-weight:700;padding:5px 16px;font-size:12px;}
+  .copybtn:hover{background:var(--amber300);}
+  .hint{font-size:13px;color:var(--slate600);margin:12px 0 0;line-height:1.6;}
+
+  section{margin-bottom:24px;}
+  .sec-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;border-left:4px solid var(--slate300);padding-left:12px;}
+  .sec-head.now{border-left-color:var(--amber400);}
+  .place{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--slate400);}
+  .sec-head h2{margin:0;font-size:18px;color:var(--teal900);}
+  .range{font-size:12px;color:var(--slate500);}
+  .sec-note{font-size:12px;color:var(--slate400);}
+  .link{font-size:11px;color:var(--slate400);}
+  .link:hover{color:var(--teal700);}
+  .count{margin-left:auto;font-size:12px;color:var(--slate400);}
+
+  .card{margin-top:8px;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden;}
+  .item{padding:12px 14px;border-top:1px solid var(--stone200);transition:background .5s;}
+  .item:first-child{border-top:none;}
+  .item.flash{background:var(--amber100);}
+  .item-row{display:flex;align-items:flex-start;gap:12px;}
+  .check{margin-top:2px;flex-shrink:0;width:22px;height:22px;border-radius:6px;border:2px solid var(--slate300);background:#fff;display:flex;align-items:center;justify-content:center;padding:0;}
+  .check.on{border-color:var(--teal700);background:var(--teal700);}
+  .check svg{width:16px;height:16px;color:#fff;}
+  .body{min-width:0;flex:1;}
+  .title-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  .ttl{font-size:15px;line-height:1.4;color:var(--slate800);}
+  .ttl.done{color:var(--slate400);text-decoration:line-through;}
+  .tag{flex-shrink:0;border-radius:999px;border:1px solid;padding:1px 8px;font-size:10px;font-family:ui-monospace,monospace;}
+  .tag.高{background:var(--rose50);color:var(--rose700);border-color:var(--rose200);}
+  .tag.中{background:var(--amber50);color:#92400e;border-color:#fde68a;}
+  .tag.低{background:#f8fafc;color:var(--slate500);border-color:var(--slate200);}
+  .detail{margin:4px 0 0;font-size:13px;line-height:1.6;color:var(--slate500);}
+  .noteview{display:block;width:100%;text-align:left;margin-top:8px;border-left:2px solid var(--amber400);background:var(--amber50);border-radius:0 4px 4px 0;padding:8px 12px;font-size:13px;color:var(--amber900);}
+  .noteadd{margin-top:4px;font-size:11px;color:var(--slate400);}
+  .noteadd:hover{color:#d97706;}
+  .del{flex-shrink:0;margin-right:-4px;padding:4px 8px;font-size:12px;color:var(--slate300);}
+  .del:hover{color:var(--rose500);}
+  textarea.note{width:100%;border:1px solid #fcd34d;background:var(--amber50);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--slate800);margin-top:8px;resize:vertical;}
+  .save{margin-top:4px;border-radius:6px;background:var(--teal800);color:#fff;padding:4px 12px;font-size:12px;}
+  .save:hover{background:var(--teal900);}
+
+  .addrow{background:var(--stone50);padding:8px 14px;}
+  .addrow .line{display:flex;align-items:center;gap:8px;}
+  .addrow input.add{min-width:0;flex:1;background:transparent;border:none;border-radius:6px;padding:6px 4px;font-size:14px;color:var(--slate700);}
+  .addrow input.add.warn{outline:2px solid var(--rose500);}
+  .addrow select{border:1px solid var(--slate300);background:#fff;border-radius:6px;padding:4px 6px;font-size:12px;color:var(--slate600);}
+  .addrow .addbtn{border-radius:6px;background:var(--teal800);color:#fff;padding:6px 12px;font-size:12px;}
+  .addrow .addbtn:hover{background:var(--teal900);}
+  .warnmsg{margin:4px 0 0 4px;font-size:11px;color:var(--rose600);}
+  .empty{padding:16px;font-size:14px;color:var(--slate400);}
+
+  .pform{border:1px solid var(--teal300);background:var(--teal50);border-radius:12px;padding:16px;}
+  .pgrid{display:grid;gap:12px;grid-template-columns:1fr 1fr;}
+  .pgrid label{display:block;}
+  .pgrid label.full{grid-column:1/-1;}
+  .pgrid .lab{display:block;margin-bottom:4px;font-size:11px;font-family:ui-monospace,monospace;color:var(--teal800);}
+  .pgrid input{width:100%;border:1px solid var(--slate300);border-radius:6px;padding:8px;font-size:14px;}
+  .pform .btns{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;}
+  .pform .primary{border-radius:6px;background:var(--teal800);color:#fff;padding:7px 16px;font-size:12px;}
+  .pform .primary:hover{background:var(--teal900);}
+  .pform .ghost{border-radius:6px;border:1px solid var(--slate300);background:#fff;color:var(--slate600);padding:7px 12px;font-size:12px;}
+  .pform .delp{margin-left:auto;font-size:12px;color:var(--slate400);}
+  .pform .delp:hover{color:var(--rose500);}
+
+  .addphase{width:100%;border:2px dashed var(--slate300);border-radius:12px;padding:12px;font-size:12px;color:var(--slate500);margin-bottom:24px;background:#fff;}
+  .addphase:hover{border-color:var(--teal700);color:var(--teal800);}
+
+  .foot{margin-top:32px;border-top:1px solid var(--stone300);padding-top:16px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .foot .note{font-size:11px;color:var(--slate400);}
+  .foot .reset{font-size:11px;color:var(--slate400);}
+  .foot .reset:hover{color:var(--rose500);}
+  @media(max-width:520px){ .pgrid{grid-template-columns:1fr;} .pass-stub{width:100px;} .pass h1{font-size:22px;} }
+</style>
+</head>
+<body>
+<div id="app" class="wrap"></div>
+<script>
+(function(){
+  "use strict";
+  var KEY="th-checklist-standalone-v1";
+  var DEPARTURE=new Date("2026-08-01T00:00:00+09:00");
+  var PRI_ORDER={"高":0,"中":1,"低":2};
+
+  function defaultPhases(){return[
+    {id:"jp",place:"TOKYO",label:"日本にいる間",start:"2026-07-01",end:"2026-07-31",note:""},
+    {id:"day0",place:"BKK",label:"到着日",start:"2026-08-01",end:"2026-08-01",note:"VZ831 NRT→BKK"},
+    {id:"bkk",place:"BKK",label:"バンコク",start:"2026-08-02",end:"2026-08-14",note:"プラカノン"},
+    {id:"cnx",place:"CNX",label:"チェンマイ",start:"2026-08-15",end:"2026-09-26",note:"BKKから空路"}
+  ];}
+  function defaultTasks(){
+    var i=0; function t(phase,title,pri,detail){return{id:phase+"-"+(i++)+"-"+Math.random().toString(36).slice(2,6),phase:phase,title:title,pri:pri,detail:detail||"",note:"",done:false};}
+    return[
+      t("jp","Wiseに日本円を送金（当面の生活費＋デポジット分）","高","レートを見て分割送金でもOK"),
+      t("jp","スーツケースに全荷物を詰め、スケボー込みで重量を測る","高","ハードケースは預け入れ扱い"),
+      t("jp","Kiwi.comの預け荷物の個数・重量の最終確認","高","スケボーが別個数扱いになるか要確認"),
+      t("jp","チェンマイの宿を決めて予約する","高","8/15着。長期割引の有無を確認"),
+      t("jp","8/15 バンコク→チェンマイの航空券を予約","高","スケボー込みの預け荷物の規定も確認"),
+      t("jp","povo2.0を物理SIM→eSIMに切り替える","高","日本にいる間に完了させる"),
+      t("jp","医療／旅行保険の契約を確定させる","高","未契約。出発前に必ず"),
+      t("jp","JP出口VPNの動作確認","高","ipinfo.ioで country=JP を確認"),
+      t("jp","Anytime Fitness要町の退会手続き","高","毎月10日が締切"),
+      t("jp","パスポート／ビザ／航空券／宿の控えをオフライン保存＋紙で1部","高","スマホ紛失時の保険"),
+      t("jp","重量に余裕があれば追加購入（体重計・ヘッドホン・日本食）","低",""),
+      t("jp","本・洋服・CDをブックオフで処分","中","量が多ければ宅配買取も"),
+      t("jp","本の処分（Charibon）・オーディオ機器の出張買取","中",""),
+      t("jp","iPhone XSの売却・iPhone 13へのデータ移行","中",""),
+      t("jp","クレカの海外利用設定と緊急連絡先の控え","中","SMBC Olive / Amazon Prime Mastercard"),
+      t("jp","ジブリパズルの売却","低","日本国内で売り切る"),
+      t("jp","期限切れ消火器の処分","低",""),
+      t("day0","空港でeSIM購入（月プラン・ギガ多め）","高","入国審査後。パスポート提示"),
+      t("day0","現金の確保（ATMまたは両替）","高","初日分＋交通費"),
+      t("day0","荷物受取（スケボーは大型荷物レーンの可能性）","高",""),
+      t("day0","Grabで配車 → プラカノンの宿へチェックイン","中","初日は現金払いでも可"),
+      t("bkk","SCB銀行で電話番号を変更","高","持ち物：パスポート・カード・通帳・タイの新番号。パスポート更新前に"),
+      t("bkk","SCB Easyアプリの再ログイン／OTP受信を確認","高","番号変更の直後にその場で"),
+      t("bkk","8/15 空港へ移動・搭乗（BKK→CNX）","高","スケボーの預け入れで時間に余裕を"),
+      t("bkk","GrabにSCB銀行のカードを登録","中",""),
+      t("bkk","Wise → SCB へ少額でテスト送金","中","着金と手数料を確認してから本送金"),
+      t("bkk","Kwangに連絡して会う","低","プラカノン"),
+      t("bkk","ジムとスケートスポットの下見","低",""),
+      t("cnx","宿にチェックイン","高",""),
+      t("cnx","パスポート更新を申請（在チェンマイ日本国総領事館）","高","申請可能な最短日を再確認。書類・証明写真は前日までに"),
+      t("cnx","受取日を確認 → 9/26の便を維持するか判断","高","Kiwiの日付変更は1回だけ"),
+      t("cnx","滞在延長申請（イミグレ・1,900THB）","高","Central Festival 2F。TR満了は9月末。TM.7と写真"),
+      t("cnx","新パスポート受取後、SCB・航空券・イミグレ情報を更新","中",""),
+      t("cnx","コワーキング StarWork の見学","低","Central Festival 4F")
+    ];
+  }
+
+  var data, ui={openOnly:false,exportOpen:false,exportIncludeDone:false,copyMsg:"",editingNote:null,phaseForm:null,confirm:null,warn:null,flash:null,draft:{}};
+
+  function load(){
+    try{ var raw=localStorage.getItem(KEY); if(raw){ data=JSON.parse(raw); return; } }catch(e){}
+    data={phases:defaultPhases(),tasks:defaultTasks()};
+  }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(e){} }
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+  function md(d){ var p=String(d||"").split("-"); return p.length===3?(+p[1])+"/"+(+p[2]):""; }
+  function rangeOf(p){ return p.start===p.end?md(p.start):md(p.start)+" – "+md(p.end); }
+  function byStart(a,b){ return String(a.start).localeCompare(String(b.start)); }
+  function phasesSorted(){ return data.phases.slice().sort(byStart); }
+
+  function exportText(){
+    var lines=["タイ移住 やることリスト"];
+    phasesSorted().forEach(function(p){
+      var list=data.tasks.filter(function(t){return t.phase===p.id&&(ui.exportIncludeDone?true:!t.done);})
+        .sort(function(a,b){return (a.done-b.done)||(PRI_ORDER[a.pri]-PRI_ORDER[b.pri]);});
+      if(!list.length)return;
+      lines.push("","■ "+p.label+"（"+rangeOf(p)+(p.note?" "+p.note:"")+"）");
+      list.forEach(function(t){
+        var sub=[t.detail,t.note].filter(Boolean).join(" / ");
+        lines.push((t.done?"✓ ":"")+"【"+t.pri+"】"+t.title+(sub?" ／ "+sub:""));
+      });
+    });
+    return lines.join("\n");
+  }
+
+  function phaseFormHTML(f){
+    return '<div class="pform">'
+      +'<div class="pgrid">'
+      +'<label><span class="lab">場所の名前</span><input id="pf-label" value="'+esc(f.label)+'" placeholder="ホーチミン"></label>'
+      +'<label><span class="lab">コード（任意・3文字程度）</span><input id="pf-place" value="'+esc(f.place)+'" placeholder="SGN" style="font-family:ui-monospace,monospace"></label>'
+      +'<label><span class="lab">開始日</span><input id="pf-start" type="date" value="'+esc(f.start)+'"></label>'
+      +'<label><span class="lab">終了日</span><input id="pf-end" type="date" value="'+esc(f.end)+'"></label>'
+      +'<label class="full"><span class="lab">補足（宿・便名など・任意）</span><input id="pf-note" value="'+esc(f.note)+'" placeholder="1区・宿は未定"></label>'
+      +'</div>'
+      +'<div class="btns">'
+      +'<button class="primary" data-a="phase-save">保存</button>'
+      +'<button class="ghost" data-a="phase-cancel">キャンセル</button>'
+      +(f.id?(ui.confirm==="delp-"+f.id
+          ?'<span class="delp" style="display:flex;gap:8px;align-items:center;color:var(--rose700)">この場所と項目'+data.tasks.filter(function(t){return t.phase===f.id;}).length+'件を削除しますか？<button class="go" style="border-radius:6px;background:var(--rose600);color:#fff;padding:4px 12px" data-a="phase-del" data-id="'+f.id+'">削除</button><button class="no" style="color:var(--slate500)" data-a="cancel">やめる</button></span>'
+          :'<button class="delp" data-a="phase-delask" data-id="'+f.id+'">この場所を削除</button>'):'')
+      +'</div></div>';
+  }
+
+  function render(){
+    var now=new Date();
+    var daysLeft=Math.ceil((DEPARTURE-now)/86400000); if(daysLeft<0)daysLeft=0;
+    var doneAll=data.tasks.filter(function(t){return t.done;}).length;
+    var total=data.tasks.length;
+    var pct=total?(doneAll/total*100):0;
+    var phases=phasesSorted();
+    var current=phases.filter(function(p){return now>=new Date(p.start)&&now<=new Date(p.end+"T23:59:59");})[0];
+
+    var h='';
+    // header
+    h+='<div class="pass"><div class="pass-main">'
+      +'<p class="pass-kicker mono">Relocation checklist</p>'
+      +'<h1>タイ移住 やることリスト</h1>'
+      +'<div class="pass-bar"><div class="track"><div class="fill" style="width:'+pct+'%"></div></div><span class="mono" style="font-size:14px;color:var(--teal100)">'+doneAll+'/'+total+'</span></div>'
+      +'</div><div class="pass-stub"><span class="stub-label mono">departure</span><span class="stub-num mono">'+daysLeft+'</span><span class="stub-unit mono">days · 8/1</span></div></div>';
+
+    // toolbar
+    h+='<div class="toolbar">';
+    h+='<button class="pill" data-a="openonly">'+(ui.openOnly?"完了した項目も表示する":"未完了だけ表示する")+'</button>';
+    if(!ui.openOnly&&doneAll>0){
+      h+= ui.confirm==="cleardone"
+        ?'<span class="confirm mono">完了'+doneAll+'件を削除しますか？<button class="go" data-a="cleardone-go">削除</button><button class="no" data-a="cancel">やめる</button></span>'
+        :'<button class="pill danger" data-a="cleardone-ask">完了した項目を削除（'+doneAll+'）</button>';
+    }
+    h+='<button class="pill solid" data-a="export">'+(ui.exportOpen?"書き出しを閉じる":"メモアプリ用に書き出す")+'</button>';
+    h+='</div>';
+
+    // export
+    if(ui.exportOpen){
+      h+='<div class="export"><div class="row">'
+        +'<button class="pill" data-a="export-inc">'+(ui.exportIncludeDone?"完了済みも書き出し中":"未完了だけ書き出し中")+'</button>'
+        +'<button class="copybtn" data-a="copy">コピー</button>'
+        +(ui.copyMsg?'<span class="mono" style="font-size:12px;color:var(--teal700)">'+esc(ui.copyMsg)+'</span>':'')
+        +'</div>'
+        +'<textarea readonly id="exp" rows="12">'+esc(exportText())+'</textarea>'
+        +'<p class="hint">貼り付けたあと、項目の行だけを選んで <span class="mono" style="color:var(--teal800)">⇧⌘L</span>（iPhoneは行を選択→チェックリスト書式）にするとチェックリストになります。</p>'
+        +'</div>';
+    }
+
+    // sections
+    phases.forEach(function(phase){
+      var all=data.tasks.filter(function(t){return t.phase===phase.id;});
+      var list=all.filter(function(t){return ui.openOnly?!t.done:true;})
+        .sort(function(a,b){return (a.done-b.done)||(PRI_ORDER[a.pri]-PRI_ORDER[b.pri]);});
+      var done=all.filter(function(t){return t.done;}).length;
+      var editing=ui.phaseForm&&ui.phaseForm.id===phase.id;
+
+      h+='<section>';
+      if(editing){ h+='<div style="margin-bottom:8px">'+phaseFormHTML(ui.phaseForm)+'</div>'; }
+      else{
+        h+='<div class="sec-head'+(current&&current.id===phase.id?' now':'')+'">'
+          +'<span class="place mono">'+esc(phase.place)+'</span>'
+          +'<h2>'+esc(phase.label)+'</h2>'
+          +'<span class="range mono">'+rangeOf(phase)+'</span>'
+          +(phase.note?'<span class="sec-note">'+esc(phase.note)+'</span>':'')
+          +'<button class="link mono" data-a="phase-edit" data-id="'+phase.id+'">編集</button>'
+          +'<span class="count mono">'+done+'/'+all.length+'</span>'
+          +'</div>';
+      }
+
+      h+='<div class="card">';
+      if(!list.length){ h+='<p class="empty">'+(all.length?"表示できる項目はありません。":"項目はありません。下から追加できます。")+'</p>'; }
+      list.forEach(function(t){
+        h+='<div class="item'+(ui.flash===t.id?' flash':'')+'"><div class="item-row">';
+        h+='<button class="check'+(t.done?' on':'')+'" data-a="toggle" data-id="'+t.id+'" aria-label="完了切り替え">'
+          +(t.done?'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 10.5l3.5 3.5L15 6.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
+          +'</button>';
+        h+='<div class="body">';
+        h+='<div class="title-row"><span class="ttl'+(t.done?' done':'')+'">'+esc(t.title)+'</span><span class="tag '+t.pri+'">'+t.pri+'</span></div>';
+        if(t.detail) h+='<p class="detail">'+esc(t.detail)+'</p>';
+        if(ui.editingNote===t.id){
+          h+='<textarea class="note" id="note-'+t.id+'" rows="2" placeholder="気づいたことをメモ">'+esc(t.note)+'</textarea>'
+            +'<button class="save" data-a="note-save" data-id="'+t.id+'">メモを保存</button>';
+        } else if(t.note){
+          h+='<button class="noteview" data-a="note-edit" data-id="'+t.id+'">'+esc(t.note)+'</button>';
+        } else {
+          h+='<button class="noteadd mono" data-a="note-edit" data-id="'+t.id+'">＋ メモ</button>';
+        }
+        h+='</div>';
+        h+='<button class="del mono" data-a="del-task" data-id="'+t.id+'" aria-label="削除">✕</button>';
+        h+='</div></div>';
+      });
+
+      // add row
+      var dr=ui.draft[phase.id]||{title:"",pri:"中"};
+      h+='<div class="addrow"><div class="line">'
+        +'<input class="add'+(ui.warn===phase.id?' warn':'')+'" data-phase="'+phase.id+'" value="'+esc(dr.title)+'" placeholder="やることを追加">'
+        +'<select data-prisel="'+phase.id+'">'
+          +'<option'+(dr.pri==="高"?" selected":"")+'>高</option>'
+          +'<option'+(dr.pri==="中"?" selected":"")+'>中</option>'
+          +'<option'+(dr.pri==="低"?" selected":"")+'>低</option>'
+        +'</select>'
+        +'<button class="addbtn" data-a="add-task" data-id="'+phase.id+'">追加</button>'
+        +'</div>'
+        +(ui.warn===phase.id?'<p class="warnmsg mono">内容を入力してから「追加」を押してください。</p>':'')
+        +'</div>';
+
+      h+='</div></section>';
+    });
+
+    // add phase
+    if(ui.phaseForm&&!ui.phaseForm.id){ h+='<div style="margin-bottom:24px">'+phaseFormHTML(ui.phaseForm)+'</div>'; }
+    else { h+='<button class="addphase mono" data-a="phase-add">＋ 場所を追加（ホーチミンなど）</button>'; }
+
+    // footer
+    h+='<div class="foot"><p class="note mono">チェックとメモはこの端末に自動保存されます</p>';
+    h+= ui.confirm==="reset"
+      ?'<span class="mono" style="font-size:11px;color:var(--rose600);display:flex;gap:8px;align-items:center">すべて初期化しますか？<button class="go" style="border-radius:6px;background:var(--rose600);color:#fff;padding:4px 8px" data-a="reset-go">実行</button><button style="color:var(--slate400);padding:4px" data-a="cancel">やめる</button></span>'
+      :'<button class="reset mono" data-a="reset-ask">初期状態に戻す</button>';
+    h+='</div>';
+
+    document.getElementById("app").innerHTML=h;
+    ui.flash=null;
+  }
+
+  // capture add-input values before a re-render so typing isn't lost
+  function captureDrafts(){
+    document.querySelectorAll("input.add").forEach(function(el){
+      var p=el.getAttribute("data-phase");
+      ui.draft[p]=ui.draft[p]||{title:"",pri:"中"};
+      ui.draft[p].title=el.value;
+    });
+    document.querySelectorAll("select[data-prisel]").forEach(function(el){
+      var p=el.getAttribute("data-prisel");
+      ui.draft[p]=ui.draft[p]||{title:"",pri:"中"};
+      ui.draft[p].pri=el.value;
+    });
+  }
+
+  function addTask(phaseId){
+    var dr=ui.draft[phaseId]||{title:"",pri:"中"};
+    var title=(dr.title||"").trim();
+    if(!title){ ui.warn=phaseId; render(); return; }
+    var id=phaseId+"-"+Date.now();
+    data.tasks.push({id:id,phase:phaseId,title:title,pri:dr.pri||"中",detail:"",note:"",done:false});
+    ui.draft[phaseId]={title:"",pri:dr.pri||"中"};
+    ui.warn=null; ui.flash=id;
+    save(); render();
+    setTimeout(function(){ var el=document.querySelector('.item.flash'); if(el) el.classList.remove('flash'); },1500);
+  }
+
+  function savePhase(){
+    var g=function(id){var e=document.getElementById(id);return e?e.value:"";};
+    var label=g("pf-label").trim(), place=g("pf-place").trim(), start=g("pf-start"), end=g("pf-end"), note=g("pf-note").trim();
+    if(!label||!start||!end){ return; }
+    if(end<start) end=start;
+    var f=ui.phaseForm;
+    var clean={id:f.id||("p"+Date.now()),place:(place||label).toUpperCase().slice(0,6),label:label,start:start,end:end,note:note};
+    if(f.id){ data.phases=data.phases.map(function(p){return p.id===f.id?clean:p;}); }
+    else{ data.phases.push(clean); }
+    ui.phaseForm=null; ui.confirm=null; save(); render();
+  }
+
+  document.getElementById("app").addEventListener("click",function(ev){
+    var el=ev.target.closest("[data-a]"); if(!el) return;
+    var a=el.getAttribute("data-a"), id=el.getAttribute("data-id");
+    if(a==="toggle"){ captureDrafts(); data.tasks=data.tasks.map(function(t){return t.id===id?Object.assign({},t,{done:!t.done}):t;}); save(); render(); }
+    else if(a==="del-task"){ captureDrafts(); data.tasks=data.tasks.filter(function(t){return t.id!==id;}); save(); render(); }
+    else if(a==="add-task"){ captureDrafts(); addTask(id); }
+    else if(a==="openonly"){ captureDrafts(); ui.openOnly=!ui.openOnly; ui.confirm=null; render(); }
+    else if(a==="cleardone-ask"){ ui.confirm="cleardone"; render(); }
+    else if(a==="cleardone-go"){ data.tasks=data.tasks.filter(function(t){return !t.done;}); ui.confirm=null; save(); render(); }
+    else if(a==="export"){ captureDrafts(); ui.exportOpen=!ui.exportOpen; ui.copyMsg=""; render(); }
+    else if(a==="export-inc"){ ui.exportIncludeDone=!ui.exportIncludeDone; render(); }
+    else if(a==="copy"){
+      var text=exportText();
+      var done=function(ok){ ui.copyMsg=ok?"コピーしました。メモアプリに貼り付けてください。":"下の枠を長押しして全選択→コピーしてください。"; render(); };
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){done(true);},function(){var t=document.getElementById("exp");if(t){t.focus();t.select();}done(false);}); }
+      else{ var t=document.getElementById("exp"); if(t){t.focus();t.select();try{document.execCommand("copy");done(true);}catch(e){done(false);}} }
+    }
+    else if(a==="note-edit"){ captureDrafts(); ui.editingNote=id; render(); var ta=document.getElementById("note-"+id); if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);} }
+    else if(a==="note-save"){ var ta=document.getElementById("note-"+id); var v=ta?ta.value:""; data.tasks=data.tasks.map(function(t){return t.id===id?Object.assign({},t,{note:v}):t;}); ui.editingNote=null; save(); render(); }
+    else if(a==="phase-edit"){ captureDrafts(); var p=data.phases.filter(function(x){return x.id===id;})[0]; ui.phaseForm=Object.assign({},p); ui.confirm=null; render(); }
+    else if(a==="phase-add"){ captureDrafts(); ui.phaseForm={id:null,place:"",label:"",start:"",end:"",note:""}; ui.confirm=null; render(); }
+    else if(a==="phase-save"){ savePhase(); }
+    else if(a==="phase-cancel"){ ui.phaseForm=null; ui.confirm=null; render(); }
+    else if(a==="phase-delask"){ ui.confirm="delp-"+id; render(); }
+    else if(a==="phase-del"){ data.phases=data.phases.filter(function(p){return p.id!==id;}); data.tasks=data.tasks.filter(function(t){return t.phase!==id;}); ui.phaseForm=null; ui.confirm=null; save(); render(); }
+    else if(a==="reset-ask"){ ui.confirm="reset"; render(); }
+    else if(a==="reset-go"){ data={phases:defaultPhases(),tasks:defaultTasks()}; ui.confirm=null; ui.phaseForm=null; save(); render(); }
+    else if(a==="cancel"){ ui.confirm=null; render(); }
+  });
+
+  // Enter to add (respect Japanese IME composition)
+  document.getElementById("app").addEventListener("keydown",function(ev){
+    if(ev.key!=="Enter") return;
+    var el=ev.target;
+    if(el.classList&&el.classList.contains("add")&&!ev.isComposing){
+      ev.preventDefault(); captureDrafts(); addTask(el.getAttribute("data-phase"));
+    }
+  });
+
+  load(); render();
+})();
+</script>
+</body>
+</html>
