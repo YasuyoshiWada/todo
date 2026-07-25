@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="持ち物">
+<meta name="theme-color" content="#78350f">
+<link rel="manifest" href='data:application/manifest+json,{"name":"日本出国 持ち物リスト","short_name":"持ち物","display":"standalone","background_color":"%2378350f","theme_color":"%2378350f","start_url":"."}'>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%2378350f'/%3E%3Ctext x='90' y='122' font-size='92' text-anchor='middle' fill='%23fbbf24'%3E%F0%9F%A7%B3%3C/text%3E%3C/svg%3E">
+<title>日本出国 持ち物リスト</title>
+<style>
+  :root{
+    --stone100:#f5f5f4; --stone50:#fafaf9; --stone200:#e7e5e4; --stone300:#d6d3d1;
+    --brown900:#78350f; --brown800:#92400e; --brown700:#b45309; --brown300:#fcd34d;
+    --amber400:#fbbf24; --amber300:#fcd34d; --amber100:#fef3c7; --amber50:#fffbeb; --amber900:#78350f;
+    --teal800:#115e59; --teal700:#0f766e; --teal50:#f0fdfa; --teal300:#5eead4;
+    --rose600:#e11d48; --rose700:#be123c; --rose500:#f43f5e; --rose200:#fecdd3; --rose50:#fff1f2;
+    --sky700:#0369a1; --sky50:#f0f9ff; --sky200:#bae6fd;
+    --slate800:#1e293b; --slate700:#334155; --slate600:#475569; --slate500:#64748b; --slate400:#94a3b8; --slate300:#cbd5e1; --slate200:#e2e8f0;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--stone100);color:var(--slate800);
+    font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    -webkit-text-size-adjust:100%;}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 48px;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  input,select,textarea{font-family:inherit;}
+  input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--brown700);outline-offset:1px;}
+
+  .pass{display:flex;overflow:hidden;border-radius:12px;background:var(--brown900);color:var(--stone50);box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:28px;}
+  .pass-main{flex:1;padding:22px;}
+  .pass-kicker{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--brown300);margin:0;}
+  .pass h1{margin:8px 0 0;font-size:26px;}
+  .pass-bar{display:flex;align-items:center;gap:12px;margin-top:16px;}
+  .track{flex:1;height:6px;border-radius:999px;background:var(--brown800);overflow:hidden;}
+  .fill{height:100%;border-radius:999px;background:var(--amber400);transition:width .4s;}
+  .pass-stub{width:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px;border-left:2px dashed var(--brown800);}
+  .stub-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brown300);}
+  .stub-num{font-size:40px;font-weight:700;line-height:1;color:var(--amber400);}
+  .stub-unit{font-size:10px;letter-spacing:.1em;color:var(--brown300);}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px;}
+  .pill{border-radius:999px;border:1px solid var(--slate300);background:#fff;padding:7px 16px;font-size:12px;color:var(--slate600);}
+  .pill:hover{border-color:var(--brown700);color:var(--brown800);}
+  .pill.on{background:var(--brown800);border-color:var(--brown700);color:#fff;}
+  .pill.danger:hover{border-color:var(--rose500);background:var(--rose50);color:var(--rose600);}
+  .pill.solid{background:var(--brown800);border-color:var(--brown700);color:#fff;}
+  .pill.solid:hover{background:var(--brown900);color:#fff;}
+
+  .tally{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:20px;padding:10px 14px;background:#fff;border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,.05);font-size:12px;color:var(--slate600);}
+  .tally b{color:var(--slate800);}
+
+  .confirm{display:flex;align-items:center;gap:8px;border-radius:999px;border:1px solid var(--rose200);background:var(--rose50);padding:4px 4px 4px 12px;font-size:12px;color:var(--rose700);}
+  .confirm .go{border-radius:999px;background:var(--rose600);color:#fff;padding:4px 12px;}
+  .confirm .no{padding:4px 8px;color:var(--rose500);}
+
+  .export{border:1px solid var(--stone300);background:#fff;border-radius:12px;padding:16px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .export .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px;}
+  .export textarea{width:100%;border:1px solid var(--slate300);background:var(--stone50);border-radius:8px;padding:12px;font-family:ui-monospace,monospace;font-size:12px;line-height:1.7;color:var(--slate700);}
+  .copybtn{border-radius:999px;background:var(--amber400);color:var(--brown900);font-weight:700;padding:5px 16px;font-size:12px;}
+  .hint{font-size:13px;color:var(--slate600);margin:12px 0 0;line-height:1.6;}
+
+  section{margin-bottom:24px;}
+  .sec-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;border-left:4px solid var(--slate300);padding-left:12px;}
+  .sec-head.buy{border-left-color:var(--teal700);}
+  .sec-head h2{margin:0;font-size:18px;color:var(--brown900);}
+  .sec-head.buy h2{color:var(--teal800);}
+  .sec-note{font-size:12px;color:var(--slate400);}
+  .link{font-size:11px;color:var(--slate400);}
+  .link:hover{color:var(--brown700);}
+  .count{margin-left:auto;font-size:12px;color:var(--slate400);}
+
+  .card{margin-top:8px;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden;}
+  .item{padding:10px 14px;border-top:1px solid var(--stone200);transition:background .5s;}
+  .item:first-child{border-top:none;}
+  .item.flash{background:var(--amber100);}
+  .item-row{display:flex;align-items:flex-start;gap:12px;}
+  .check{margin-top:1px;flex-shrink:0;width:22px;height:22px;border-radius:6px;border:2px solid var(--slate300);background:#fff;display:flex;align-items:center;justify-content:center;padding:0;}
+  .check.on{border-color:var(--brown800);background:var(--brown800);}
+  .check svg{width:16px;height:16px;color:#fff;}
+  .body{min-width:0;flex:1;}
+  .title-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+  .ttl{font-size:15px;line-height:1.4;color:var(--slate800);}
+  .ttl.done{color:var(--slate400);text-decoration:line-through;}
+  .bag{flex-shrink:0;border-radius:999px;border:1px solid;padding:1px 8px;font-size:10px;font-family:ui-monospace,monospace;}
+  .bag.預け{background:var(--amber50);color:#92400e;border-color:#fde68a;}
+  .bag.機内{background:var(--sky50);color:var(--sky700);border-color:var(--sky200);}
+  .bag.未定{background:#f8fafc;color:var(--slate400);border-color:var(--slate200);}
+  .detail{margin:3px 0 0;font-size:12px;line-height:1.5;color:var(--slate500);}
+  .warnnote{margin:3px 0 0;font-size:12px;line-height:1.5;color:var(--rose600);}
+  .noteview{display:block;width:100%;text-align:left;margin-top:6px;border-left:2px solid var(--amber400);background:var(--amber50);border-radius:0 4px 4px 0;padding:6px 10px;font-size:13px;color:var(--amber900);}
+  .noteadd{margin-top:2px;font-size:11px;color:var(--slate400);}
+  .noteadd:hover{color:#d97706;}
+  .del{flex-shrink:0;margin-right:-4px;padding:4px 8px;font-size:12px;color:var(--slate300);}
+  .del:hover{color:var(--rose500);}
+  textarea.note{width:100%;border:1px solid #fcd34d;background:var(--amber50);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--slate800);margin-top:6px;resize:vertical;}
+  .save{margin-top:4px;border-radius:6px;background:var(--brown800);color:#fff;padding:4px 12px;font-size:12px;}
+
+  .addrow{background:var(--stone50);padding:8px 14px;}
+  .addrow .line{display:flex;align-items:center;gap:8px;}
+  .addrow input.add{min-width:0;flex:1;background:transparent;border:none;border-radius:6px;padding:6px 4px;font-size:14px;color:var(--slate700);}
+  .addrow input.add.warn{outline:2px solid var(--rose500);}
+  .addrow select{border:1px solid var(--slate300);background:#fff;border-radius:6px;padding:4px 6px;font-size:12px;color:var(--slate600);}
+  .addrow .addbtn{border-radius:6px;background:var(--brown800);color:#fff;padding:6px 12px;font-size:12px;}
+  .warnmsg{margin:4px 0 0 4px;font-size:11px;color:var(--rose600);}
+  .empty{padding:16px;font-size:14px;color:var(--slate400);}
+
+  .cform{border:1px solid var(--brown300);background:var(--amber50);border-radius:12px;padding:16px;}
+  .cform label{display:block;}
+  .cform .lab{display:block;margin-bottom:4px;font-size:11px;font-family:ui-monospace,monospace;color:var(--brown800);}
+  .cform input{width:100%;border:1px solid var(--slate300);border-radius:6px;padding:8px;font-size:14px;}
+  .cform .btns{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;}
+  .cform .primary{border-radius:6px;background:var(--brown800);color:#fff;padding:7px 16px;font-size:12px;}
+  .cform .ghost{border-radius:6px;border:1px solid var(--slate300);background:#fff;color:var(--slate600);padding:7px 12px;font-size:12px;}
+  .cform .delp{margin-left:auto;font-size:12px;color:var(--slate400);}
+  .cform .delp:hover{color:var(--rose500);}
+
+  .addcat{width:100%;border:2px dashed var(--slate300);border-radius:12px;padding:12px;font-size:12px;color:var(--slate500);margin-bottom:24px;background:#fff;}
+  .addcat:hover{border-color:var(--brown700);color:var(--brown800);}
+
+  .foot{margin-top:32px;border-top:1px solid var(--stone300);padding-top:16px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .foot .note{font-size:11px;color:var(--slate400);}
+  .foot .reset{font-size:11px;color:var(--slate400);}
+  .foot .reset:hover{color:var(--rose500);}
+  @media(max-width:520px){ .pass-stub{width:100px;} .pass h1{font-size:21px;} }
+</style>
+</head>
+<body>
+<div id="app" class="wrap"></div>
+<script>
+(function(){
+  "use strict";
+  var KEY="jp-packing-list-v1";
+  var DEPARTURE=new Date("2026-08-01T00:00:00+09:00");
+  var BAGS=["未定","預け","機内"];
+
+  function defaultCats(){return[
+    {id:"c1",label:"貴重品・書類",note:"機内持ち込み。肌身離さず"},
+    {id:"c2",label:"電子機器",note:"モバイルバッテリーは機内持ち込み必須"},
+    {id:"c3",label:"衣類",note:""},
+    {id:"c4",label:"スケボー",note:"ハードケースで預け入れ"},
+    {id:"c5",label:"洗面・衛生",note:"液体は100ml超なら預け入れへ"},
+    {id:"c6",label:"薬・救急",note:""},
+    {id:"c7",label:"日本食",note:"肉・乳製品はタイ持ち込み不可"},
+    {id:"c8",label:"生活用品・その他",note:""},
+    {id:"c9",label:"タイで買う",note:"日本から持たないもの",buy:true}
+  ];}
+
+  function defaultItems(){
+    var i=0;
+    function t(cat,title,bag,detail,warn){return{id:"i"+(i++),cat:cat,title:title,bag:bag||"未定",detail:detail||"",warn:warn||"",note:"",done:false};}
+    return[
+      t("c1","パスポート","機内","残存期間を確認。コピーも1部"),
+      t("c1","仕事のノート","機内"),
+
+      t("c2","パソコン","機内","預けない"),
+      t("c2","充電器（各種）","機内","変換プラグも。タイはA/B/Cタイプ"),
+      t("c2","モバイルモニター","預け","ケースに入れて衣類で挟む"),
+      t("c2","イヤホン","機内"),
+      t("c2","仕事用ヘッドホン","機内"),
+      t("c2","体重計","預け","割れやすいので中央に"),
+      t("c2","キッチンスケール","預け"),
+
+      t("c3","着替え（下着・靴下・Tシャツ）","預け"),
+      t("c3","シャツ","預け"),
+      t("c3","トレーナー","預け","チェンマイの朝晩は冷える"),
+      t("c3","ジャケット","預け"),
+      t("c3","ダウンジャケット","預け","かさばるので圧縮袋推奨"),
+      t("c3","ラッシュガード","預け"),
+      t("c3","サンダル","預け"),
+      t("c3","キャップ","機内"),
+      t("c3","サングラス","機内"),
+      t("c3","メガネ","機内","予備があれば一緒に"),
+      t("c3","ハンガー","預け"),
+
+      t("c4","スケートボード","預け","ハードケース。重量を要確認"),
+      t("c4","スケボー工具","預け","","工具は機内持ち込み不可。必ず預け入れへ"),
+      t("c4","プロテクター","預け"),
+
+      t("c5","シャンプー","預け","現地調達も可。少量でも十分"),
+      t("c5","ボディソープ","預け","現地調達も可"),
+      t("c5","ボディタオル","預け"),
+      t("c5","歯ブラシ（3本）","預け"),
+      t("c5","バスタオル","預け","速乾タイプが便利"),
+      t("c5","爪切り","預け","","刃物扱い。機内持ち込み不可"),
+      t("c5","髭剃り","預け","","替刃は機内持ち込み不可"),
+      t("c5","日焼け止め","預け","100ml超は預け入れ"),
+
+      t("c6","湿疹の薬","機内","処方薬なら説明書きも一緒に"),
+      t("c6","消毒液","預け"),
+      t("c6","絆創膏","機内"),
+      t("c6","目薬（3本）","機内","消費期限の長いものを"),
+      t("c6","体温計","機内"),
+      t("c6","ピンセット","預け","","先が尖っていると機内持ち込み不可"),
+
+      t("c7","味噌汁","預け"),
+      t("c7","ふりかけ","預け"),
+      t("c7","海苔","預け"),
+      t("c7","乾燥納豆","預け"),
+      t("c7","七味唐辛子","預け"),
+
+      t("c8","アイマスク","機内"),
+      t("c8","ネックピロー","機内"),
+      t("c8","箸・スプーン・フォーク","預け"),
+      t("c8","十徳ナイフ","預け","","絶対に機内持ち込み不可。預け荷物へ"),
+      t("c8","ハサミ","預け","","刃物扱い。機内持ち込み不可"),
+      t("c8","採寸メジャー","預け"),
+
+      t("c9","まな板","未定","現地で薄いものを"),
+      t("c9","調味料（ナンプラー・油など）","未定","現地のほうが安い")
+    ];
+  }
+
+  var data, ui={hideDone:false,exportOpen:false,exportIncludeDone:false,copyMsg:"",editingNote:null,catForm:null,confirm:null,warn:null,flash:null,draft:{},filterBag:""};
+
+  function load(){
+    try{ var raw=localStorage.getItem(KEY); if(raw){ data=JSON.parse(raw); return; } }catch(e){}
+    data={cats:defaultCats(),items:defaultItems()};
+  }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(e){} }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+
+  function exportText(){
+    var lines=["日本出国 持ち物リスト"];
+    data.cats.forEach(function(c){
+      var list=data.items.filter(function(t){return t.cat===c.id&&(ui.exportIncludeDone?true:!t.done);});
+      if(!list.length)return;
+      lines.push("","■ "+c.label+(c.note?"（"+c.note+"）":""));
+      list.forEach(function(t){
+        var sub=[t.detail,t.warn,t.note].filter(Boolean).join(" / ");
+        lines.push((t.done?"✓ ":"")+"["+t.bag+"] "+t.title+(sub?" ／ "+sub:""));
+      });
+    });
+    return lines.join("\n");
+  }
+
+  function catFormHTML(f){
+    return '<div class="cform">'
+      +'<label><span class="lab">カテゴリ名</span><input id="cf-label" value="'+esc(f.label)+'" placeholder="キャンプ用品"></label>'
+      +'<label style="margin-top:12px"><span class="lab">補足（任意）</span><input id="cf-note" value="'+esc(f.note)+'" placeholder="現地で買い足すもの"></label>'
+      +'<div class="btns">'
+      +'<button class="primary" data-a="cat-save">保存</button>'
+      +'<button class="ghost" data-a="cat-cancel">キャンセル</button>'
+      +(f.id?(ui.confirm==="delc-"+f.id
+          ?'<span style="display:flex;gap:8px;align-items:center;margin-left:auto;font-size:12px;color:var(--rose700)">中の'+data.items.filter(function(t){return t.cat===f.id;}).length+'件ごと削除しますか？<button style="border-radius:6px;background:var(--rose600);color:#fff;padding:4px 12px" data-a="cat-del" data-id="'+f.id+'">削除</button><button style="color:var(--slate500);padding:4px" data-a="cancel">やめる</button></span>'
+          :'<button class="delp" data-a="cat-delask" data-id="'+f.id+'">このカテゴリを削除</button>'):'')
+      +'</div></div>';
+  }
+
+  function render(){
+    var now=new Date();
+    var daysLeft=Math.ceil((DEPARTURE-now)/86400000); if(daysLeft<0)daysLeft=0;
+    var packable=data.items.filter(function(t){var c=data.cats.filter(function(x){return x.id===t.cat;})[0];return !(c&&c.buy);});
+    var doneAll=packable.filter(function(t){return t.done;}).length;
+    var total=packable.length;
+    var pct=total?(doneAll/total*100):0;
+    var nAzuke=packable.filter(function(t){return t.bag==="預け";}).length;
+    var nKinai=packable.filter(function(t){return t.bag==="機内";}).length;
+    var nMitei=packable.filter(function(t){return t.bag==="未定";}).length;
+
+    var h='';
+    h+='<div class="pass"><div class="pass-main">'
+      +'<p class="pass-kicker mono">Packing list · Japan → Thailand</p>'
+      +'<h1>日本出国 持ち物リスト</h1>'
+      +'<div class="pass-bar"><div class="track"><div class="fill" style="width:'+pct+'%"></div></div><span class="mono" style="font-size:14px;color:var(--amber300)">'+doneAll+'/'+total+'</span></div>'
+      +'</div><div class="pass-stub"><span class="stub-label mono">departure</span><span class="stub-num mono">'+daysLeft+'</span><span class="stub-unit mono">days · 8/1</span></div></div>';
+
+    h+='<div class="toolbar">';
+    h+='<button class="pill" data-a="hidedone">'+(ui.hideDone?"詰めたものも表示":"まだのものだけ表示")+'</button>';
+    h+='<button class="pill'+(ui.filterBag==="預け"?" on":"")+'" data-a="fbag" data-id="預け">預け入れだけ</button>';
+    h+='<button class="pill'+(ui.filterBag==="機内"?" on":"")+'" data-a="fbag" data-id="機内">機内だけ</button>';
+    h+='<button class="pill'+(ui.filterBag==="未定"?" on":"")+'" data-a="fbag" data-id="未定">未定だけ（'+nMitei+'）</button>';
+    h+='<button class="pill solid" data-a="export">'+(ui.exportOpen?"書き出しを閉じる":"メモアプリ用に書き出す")+'</button>';
+    h+='</div>';
+
+    h+='<div class="tally mono"><span>預け入れ <b>'+nAzuke+'</b></span><span>機内 <b>'+nKinai+'</b></span><span>未定 <b>'+nMitei+'</b></span><span style="margin-left:auto">タグを押すと 未定→預け→機内 と切り替わります</span></div>';
+
+    if(ui.exportOpen){
+      h+='<div class="export"><div class="row">'
+        +'<button class="pill" data-a="export-inc">'+(ui.exportIncludeDone?"詰めたものも書き出し中":"まだのものだけ書き出し中")+'</button>'
+        +'<button class="copybtn" data-a="copy">コピー</button>'
+        +(ui.copyMsg?'<span class="mono" style="font-size:12px;color:var(--brown800)">'+esc(ui.copyMsg)+'</span>':'')
+        +'</div>'
+        +'<textarea readonly id="exp" rows="12">'+esc(exportText())+'</textarea>'
+        +'<p class="hint">貼り付けたあと、項目の行だけを選んでチェックリスト書式にすると、メモアプリでもチェックできます。</p>'
+        +'</div>';
+    }
+
+    data.cats.forEach(function(cat){
+      var all=data.items.filter(function(t){return t.cat===cat.id;});
+      var list=all.filter(function(t){
+        if(ui.hideDone&&t.done)return false;
+        if(ui.filterBag&&t.bag!==ui.filterBag)return false;
+        return true;
+      });
+      var done=all.filter(function(t){return t.done;}).length;
+      var editing=ui.catForm&&ui.catForm.id===cat.id;
+
+      h+='<section>';
+      if(editing){ h+='<div style="margin-bottom:8px">'+catFormHTML(ui.catForm)+'</div>'; }
+      else{
+        h+='<div class="sec-head'+(cat.buy?' buy':'')+'">'
+          +'<h2>'+esc(cat.label)+'</h2>'
+          +(cat.note?'<span class="sec-note">'+esc(cat.note)+'</span>':'')
+          +'<button class="link mono" data-a="cat-edit" data-id="'+cat.id+'">編集</button>'
+          +'<span class="count mono">'+done+'/'+all.length+'</span>'
+          +'</div>';
+      }
+
+      h+='<div class="card">';
+      if(!list.length){ h+='<p class="empty">'+(all.length?"表示できるものはありません。":"まだ何もありません。下から追加できます。")+'</p>'; }
+      list.forEach(function(t){
+        h+='<div class="item'+(ui.flash===t.id?' flash':'')+'"><div class="item-row">';
+        h+='<button class="check'+(t.done?' on':'')+'" data-a="toggle" data-id="'+t.id+'" aria-label="詰めたか切り替え">'
+          +(t.done?'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 10.5l3.5 3.5L15 6.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
+          +'</button>';
+        h+='<div class="body">';
+        h+='<div class="title-row"><span class="ttl'+(t.done?' done':'')+'">'+esc(t.title)+'</span>'
+          +'<button class="bag '+t.bag+'" data-a="bag" data-id="'+t.id+'">'+t.bag+'</button></div>';
+        if(t.detail) h+='<p class="detail">'+esc(t.detail)+'</p>';
+        if(t.warn) h+='<p class="warnnote">⚠ '+esc(t.warn)+'</p>';
+        if(ui.editingNote===t.id){
+          h+='<textarea class="note" id="note-'+t.id+'" rows="2" placeholder="メモ">'+esc(t.note)+'</textarea>'
+            +'<button class="save" data-a="note-save" data-id="'+t.id+'">メモを保存</button>';
+        } else if(t.note){
+          h+='<button class="noteview" data-a="note-edit" data-id="'+t.id+'">'+esc(t.note)+'</button>';
+        } else {
+          h+='<button class="noteadd mono" data-a="note-edit" data-id="'+t.id+'">＋ メモ</button>';
+        }
+        h+='</div>';
+        h+='<button class="del mono" data-a="del-item" data-id="'+t.id+'" aria-label="削除">✕</button>';
+        h+='</div></div>';
+      });
+
+      var dr=ui.draft[cat.id]||{title:"",bag:"預け"};
+      h+='<div class="addrow"><div class="line">'
+        +'<input class="add'+(ui.warn===cat.id?' warn':'')+'" data-cat="'+cat.id+'" value="'+esc(dr.title)+'" placeholder="持ち物を追加">'
+        +'<select data-bagsel="'+cat.id+'">'
+          +BAGS.map(function(b){return '<option'+(dr.bag===b?" selected":"")+'>'+b+'</option>';}).join("")
+        +'</select>'
+        +'<button class="addbtn" data-a="add-item" data-id="'+cat.id+'">追加</button>'
+        +'</div>'
+        +(ui.warn===cat.id?'<p class="warnmsg mono">名前を入力してから「追加」を押してください。</p>':'')
+        +'</div>';
+
+      h+='</div></section>';
+    });
+
+    if(ui.catForm&&!ui.catForm.id){ h+='<div style="margin-bottom:24px">'+catFormHTML(ui.catForm)+'</div>'; }
+    else { h+='<button class="addcat mono" data-a="cat-add">＋ カテゴリを追加</button>'; }
+
+    h+='<div class="foot"><p class="note mono">チェックとメモはこの端末に自動保存されます</p>';
+    h+= ui.confirm==="reset"
+      ?'<span class="mono" style="font-size:11px;color:var(--rose600);display:flex;gap:8px;align-items:center">すべて初期化しますか？<button style="border-radius:6px;background:var(--rose600);color:#fff;padding:4px 8px" data-a="reset-go">実行</button><button style="color:var(--slate400);padding:4px" data-a="cancel">やめる</button></span>'
+      :'<button class="reset mono" data-a="reset-ask">初期状態に戻す</button>';
+    h+='</div>';
+
+    document.getElementById("app").innerHTML=h;
+    ui.flash=null;
+  }
+
+  function captureDrafts(){
+    document.querySelectorAll("input.add").forEach(function(el){
+      var c=el.getAttribute("data-cat");
+      ui.draft[c]=ui.draft[c]||{title:"",bag:"預け"};
+      ui.draft[c].title=el.value;
+    });
+    document.querySelectorAll("select[data-bagsel]").forEach(function(el){
+      var c=el.getAttribute("data-bagsel");
+      ui.draft[c]=ui.draft[c]||{title:"",bag:"預け"};
+      ui.draft[c].bag=el.value;
+    });
+  }
+
+  function addItem(catId){
+    var dr=ui.draft[catId]||{title:"",bag:"預け"};
+    var title=(dr.title||"").trim();
+    if(!title){ ui.warn=catId; render(); return; }
+    var id="i"+Date.now();
+    data.items.push({id:id,cat:catId,title:title,bag:dr.bag||"預け",detail:"",warn:"",note:"",done:false});
+    ui.draft[catId]={title:"",bag:dr.bag||"預け"};
+    ui.warn=null; ui.flash=id;
+    save(); render();
+    setTimeout(function(){ var el=document.querySelector(".item.flash"); if(el) el.classList.remove("flash"); },1500);
+  }
+
+  function saveCat(){
+    var g=function(id){var e=document.getElementById(id);return e?e.value:"";};
+    var label=g("cf-label").trim(), note=g("cf-note").trim();
+    if(!label) return;
+    var f=ui.catForm;
+    if(f.id){ data.cats=data.cats.map(function(c){return c.id===f.id?Object.assign({},c,{label:label,note:note}):c;}); }
+    else{ data.cats.push({id:"c"+Date.now(),label:label,note:note}); }
+    ui.catForm=null; ui.confirm=null; save(); render();
+  }
+
+  document.getElementById("app").addEventListener("click",function(ev){
+    var el=ev.target.closest("[data-a]"); if(!el) return;
+    var a=el.getAttribute("data-a"), id=el.getAttribute("data-id");
+    if(a==="toggle"){ captureDrafts(); data.items=data.items.map(function(t){return t.id===id?Object.assign({},t,{done:!t.done}):t;}); save(); render(); }
+    else if(a==="bag"){ captureDrafts(); data.items=data.items.map(function(t){ if(t.id!==id)return t; var n=BAGS[(BAGS.indexOf(t.bag)+1)%BAGS.length]; return Object.assign({},t,{bag:n}); }); save(); render(); }
+    else if(a==="del-item"){ captureDrafts(); data.items=data.items.filter(function(t){return t.id!==id;}); save(); render(); }
+    else if(a==="add-item"){ captureDrafts(); addItem(id); }
+    else if(a==="hidedone"){ captureDrafts(); ui.hideDone=!ui.hideDone; ui.confirm=null; render(); }
+    else if(a==="fbag"){ captureDrafts(); ui.filterBag = (ui.filterBag===id?"":id); render(); }
+    else if(a==="export"){ captureDrafts(); ui.exportOpen=!ui.exportOpen; ui.copyMsg=""; render(); }
+    else if(a==="export-inc"){ ui.exportIncludeDone=!ui.exportIncludeDone; render(); }
+    else if(a==="copy"){
+      var text=exportText();
+      var done=function(ok){ ui.copyMsg=ok?"コピーしました":"下の枠を長押しして全選択→コピーしてください"; render(); };
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){done(true);},function(){var t=document.getElementById("exp");if(t){t.focus();t.select();}done(false);}); }
+      else{ var t=document.getElementById("exp"); if(t){t.focus();t.select();try{document.execCommand("copy");done(true);}catch(e){done(false);}} }
+    }
+    else if(a==="note-edit"){ captureDrafts(); ui.editingNote=id; render(); var ta=document.getElementById("note-"+id); if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);} }
+    else if(a==="note-save"){ var ta2=document.getElementById("note-"+id); var v=ta2?ta2.value:""; data.items=data.items.map(function(t){return t.id===id?Object.assign({},t,{note:v}):t;}); ui.editingNote=null; save(); render(); }
+    else if(a==="cat-edit"){ captureDrafts(); var c=data.cats.filter(function(x){return x.id===id;})[0]; ui.catForm=Object.assign({},c); ui.confirm=null; render(); }
+    else if(a==="cat-add"){ captureDrafts(); ui.catForm={id:null,label:"",note:""}; ui.confirm=null; render(); }
+    else if(a==="cat-save"){ saveCat(); }
+    else if(a==="cat-cancel"){ ui.catForm=null; ui.confirm=null; render(); }
+    else if(a==="cat-delask"){ ui.confirm="delc-"+id; render(); }
+    else if(a==="cat-del"){ data.cats=data.cats.filter(function(c){return c.id!==id;}); data.items=data.items.filter(function(t){return t.cat!==id;}); ui.catForm=null; ui.confirm=null; save(); render(); }
+    else if(a==="reset-ask"){ ui.confirm="reset"; render(); }
+    else if(a==="reset-go"){ data={cats:defaultCats(),items:defaultItems()}; ui.confirm=null; ui.catForm=null; save(); render(); }
+    else if(a==="cancel"){ ui.confirm=null; render(); }
+  });
+
+  document.getElementById("app").addEventListener("keydown",function(ev){
+    if(ev.key!=="Enter") return;
+    var el=ev.target;
+    if(el.classList&&el.classList.contains("add")&&!ev.isComposing){
+      ev.preventDefault(); captureDrafts(); addItem(el.getAttribute("data-cat"));
+    }
+  });
+
+  load(); render();
+})();
+</script>
+</body>
+</html>
